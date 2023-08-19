@@ -20,4 +20,13 @@ public class Address {
     private String street;
     private String zipcode;
 
+    // JPA 스펙상 만들어야 함. public 아니라 protected 까지 허용 가능
+    protected Address() {
+    }
+
+    public Address(String city, String street, String zipcode) {
+        this.city = city;
+        this.street = street;
+        this.zipcode = zipcode;
+    }
 }
