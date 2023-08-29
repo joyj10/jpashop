@@ -61,4 +61,34 @@ public class OrderRepository {
         TypedQuery<Order> query = em.createQuery(cq).setMaxResults(1000); //최대 1000건
         return query.getResultList();
     }
+
+    /**
+     * order / member / delivery 조회
+     * - fetch join
+     * @return List<Order>
+     */
+    public List<Order> findAllWithMemberDelivery() {
+        // 한방 쿼리로 order 조회 시 member, delivery 까지 조회
+        // fetch join : LAZY 무시, 프록시가 아닌 값을 채워서 다 가져 오는 것, 기술적으로 SQL join 사용, fetch는 JPA 에만 있는 문법
+        return em.createQuery(
+                "select o from Order o" +
+                        " join fetch o.member m" +
+                        " join fetch o.delivery d", Order.class
+                ).getResultList();
+    }
+
+    /**
+     * V4 : JPA DTO 바로 조회
+     * - 물리적으로는 계층이 나눠져 있지만, 논리적으로 깨져 있음
+     * - repository 가 화면에 의지하고 있는 형태
+     * @return List<orderSimpleQueryDto>
+     */
+    public List<OrderSimpleQueryDto> findOrderDtos() {
+        return em.createQuery(
+                "select new jpabook.jpashop.repository.OrderSimpleQueryDto(o.id, m.name, o.orderDate, o.status, d.address)" +
+                        " from Order o" +
+                        " join o.member m" +
+                        " join o.delivery d", OrderSimpleQueryDto.class)
+                .getResultList();
+    }
 }
