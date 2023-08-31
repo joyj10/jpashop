@@ -30,10 +30,10 @@ public class OrderApiController {
     public List<Order> orderV1() {
         List<Order> all = orderRepository.findAllByCriteria(new OrderSearch());
         for (Order order : all) {
-            order.getMember().getName();
-            order.getDelivery().getAddress();
+            order.getMember().getName();  // LAZY 강제 초기화
+            order.getDelivery().getAddress();  // LAZY 강제 초기화
             List<OrderItem> orderItems = order.getOrderItems();
-            orderItems.forEach(o -> o.getItem().getName());
+            orderItems.forEach(o -> o.getItem().getName());  // LAZY 강제 초기화
         }
         return all;
     }
@@ -47,6 +47,21 @@ public class OrderApiController {
     @GetMapping("/api/v2/orders")
     public List<OrderDto> orderV2() {
         List<Order> orders = orderRepository.findAllByCriteria(new OrderSearch());
+
+        return orders.stream()
+                .map(OrderDto::new)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 주문 조회 V3 :  엔티티를 조회해서 DTO로 변환(fetch join 최적화)
+     * - fetch join 시 distinct 사용하여 중복 제거 필요
+     * - 페이징 불가능
+     * @return List<OrderDto>
+     */
+    @GetMapping("/api/v3/orders")
+    public List<OrderDto> orderV3() {
+        List<Order> orders = orderRepository.findAllWithItem();
 
         return orders.stream()
                 .map(OrderDto::new)
