@@ -78,6 +78,22 @@ public class OrderRepository {
     }
 
     /**
+     * fetch join + paging
+     * @param offset
+     * @param limit
+     * @return
+     */
+    public List<Order> findAllWithMemberDelivery(int offset, int limit) {
+        return em.createQuery(
+                "select o from Order o" +
+                        " join fetch o.member m" +
+                        " join fetch o.delivery d", Order.class
+                ).setFirstResult(offset)
+                .setMaxResults(limit)
+                .getResultList();
+    }
+
+    /**
      * V4 : JPA DTO 바로 조회
      * - 물리적으로는 계층이 나눠져 있지만, 논리적으로 깨져 있음
      * - repository 가 화면에 의지하고 있는 형태
