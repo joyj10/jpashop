@@ -1,8 +1,20 @@
+//querydsl 추가 (plugin 받을 수 있게 dependency 추가)
+buildscript {
+    dependencies {
+        classpath("gradle.plugin.com.ewerk.gradle.plugins:querydsl-plugin:1.0.10")
+    }
+}
+
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '2.7.7'
     id 'io.spring.dependency-management' version '1.1.2'
 }
+
+//querydsl 추가
+apply plugin: "com.ewerk.gradle.plugins.querydsl"
+
 
 group = 'jpabook'
 version = '0.0.1-SNAPSHOT'
@@ -33,7 +45,37 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation "io.springfox:springfox-boot-starter:3.0.0"
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-hibernate5'
+
+    //querydsl 추가
+    implementation 'com.querydsl:querydsl-jpa'
+    implementation 'com.querydsl:querydsl-apt'
 }
+
+//querydsl 추가 (generate 된 Q 파일 위치 지정)
+//def querydslDir = 'src/main/generated'
+def querydslDir = "$buildDir/generated/querydsl"
+
+querydsl {
+    library = "com.querydsl:querydsl-apt"
+    jpa = true
+    querydslSourcesDir = querydslDir
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java', querydslDir]
+        } }
+}
+
+compileQuerydsl{
+    options.annotationProcessorPath = configurations.querydsl
+}
+configurations {
+    querydsl.extendsFrom compileClasspath
+}
+
+
 
 tasks.named('test') {
     useJUnitPlatform()
